@@ -20,18 +20,22 @@
 import datetime
 
 from girder.constants import AccessType
+################### /opt/covalic/girder/girder/constants.py
 from girder.exceptions import GirderException
 from girder.models.model_base import Model, ValidationException
+###################   Model: /opt/covalic/girder/girder/models/model_base.py
 from girder.plugins.covalic.utility import validateDate
 from girder.plugins.covalic import scoring
 from girder.plugins.worker import utils
+###################   /opt/covalic/girder/plugins/worker/server/utils.py
 from girder.utility.progress import noProgress
 
 from ..constants import PluginSettings
 
 
 class Submission(Model):
-    @staticmethod
+    ###################  /opt/covalic/girder/girder/models/model_base.py
+    @staticmethod 
     def getUserName(user):
         """Get a user's full name."""
         return user['firstName'] + ' ' + user['lastName']
@@ -76,6 +80,9 @@ class Submission(Model):
         if doc.get('score') is not None and doc.get('overallScore') is None:
             scoring.computeAverageScores(doc['score'])
             phase = self.model('phase', 'covalic').load(
+############################  /opt/covalic/girder/girder/utility/model_importer.py  
+############################  class ModelImporter(object):  def model(model, plugin=None):
+############################  model name is 'phase', plugin name is 'covalic'
                 doc['phaseId'], force=True)
             doc['overallScore'] = scoring.computeOverallScore(doc, phase)
             doc['latest'] = True
@@ -259,6 +266,7 @@ class Submission(Model):
             otherFields['rescoring'] = True
 
         jobTitle = '%s submission: %s' % (phase['name'], folder['name'])
+        ## like this: 	p4 submission: submission_5bfb55d1076129165ff185ea_1543198304042
         job = jobModel.createJob(
             title=jobTitle, type='covalic_score', handler='worker_handler', user=user,
             otherFields=otherFields)
@@ -321,6 +329,8 @@ class Submission(Model):
             'inputs': {
                 'submission': utils.girderInputSpec(
                     folder, 'folder', token=scoreToken),
+                ##############  /opt/covalic/girder/plugins/worker/server/utils.py 
+                ##############  resource=folder, resourceType='folder'
                 'groundtruth': utils.girderInputSpec(
                     groundTruth, 'folder', token=scoreToken)
             },
@@ -331,10 +341,12 @@ class Submission(Model):
                     'format': 'string',
                     'url': '/'.join((apiUrl, 'covalic_submission',
                                      str(submission['_id']), 'score')),
-                    'headers': {'Girder-Token': scoreToken['_id']}
+                    'headers': {'Girder-Token': scoreToken['_id']},
+                    #'The score id is': submission['_id']
                 }
             },
             'jobInfo': utils.jobInfoSpec(job),
+            ##############  /opt/covalic/girder/plugins/worker/server/utils.py 
             'validate': False,
             'auto_convert': False,
             'cleanup': True
@@ -342,7 +354,9 @@ class Submission(Model):
         job['kwargs'] = kwargs
         job['covalicSubmissionId'] = submission['_id']
         job = jobModel.save(job)
+        ############## document=job in file /opt/covalic/girder/girder/models/model_base.py
         jobModel.scheduleJob(job)
+        ##########################3 ?
 
         submission['jobId'] = job['_id']
         return self.save(submission, validate=False)
