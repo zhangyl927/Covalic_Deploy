@@ -1,8 +1,10 @@
 ---
 girder_version: 2.x-maintenance
-covalic_version: master
+#covalic_version: master
+covalic_version: de1eed1ceb3a2fef266447cd5812d7566a15fc52
 covalic_metrics_version: latest
-girder_worker_version: master
+#girder_worker_version: master
+girder_worker_version: 3ee7f52953e33bc2ae647e4c3b840e11b7abb378
 pod_hosts: "{{ groups.get('tag_pod_' + pod, ['localhost']) }}"
 mongo_hosts: "{{ groups.get('tag_mongodb_true', ['localhost']) | intersect(pod_hosts) }}"
 mq_hosts: "{{ groups.get('tag_mq_true', ['localhost']) | intersect(pod_hosts) }}"
